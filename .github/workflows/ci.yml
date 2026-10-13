@@ -24,8 +24,13 @@ jobs:
       - name: Dar permisos de ejecución a Gradle wrapper
         run: chmod +x ./gradlew
 
+      - name: Esperar disponibilidad de la aplicacion (Render Cold Start)
+        run: |
+          echo "Despertando el servidor de La Botica del Alquimista..."
+          curl -s -I --retry 10 --retry-delay 5 --retry-connrefused https://boticaalquimista.onrender.com/index.html || true
+
       - name: Ejecutar pruebas automatizadas con Serenity BDD
-        run: ./gradlew test aggregate --no-daemon
+        run: ./gradlew test aggregate --no-daemon -Dheadless.mode=true
 
       - name: Publicar reporte de Documentación Viva de Serenity
         if: always()

@@ -5,7 +5,7 @@ import org.openqa.selenium.By;
 
 public class CatalogoUI {
     public static final Target TITULO_CATALOGO = Target.the("título de catálogo")
-            .located(By.tagName("h1"));
+            .located(By.xpath("//h1[contains(text(),'Catálogo')]"));
 
     public static final Target SALUDO_USUARIO = Target.the("saludo de usuario en la cabecera")
             .located(By.cssSelector(".barra .saludo"));
@@ -21,6 +21,9 @@ public class CatalogoUI {
 
     public static final Target NOMBRES_PRODUCTOS = Target.the("nombres de los productos listados")
             .located(By.cssSelector(".nombre-producto"));
+
+    public static final Target PRODUCTO_POR_NOMBRE = Target.the("producto con nombre {0}")
+            .locatedBy("//article[contains(@class,'tarjeta-producto')]//h3[contains(text(),'{0}')]");
 
     public static final Target MENSAJE_SIN_RESULTADOS = Target.the("mensaje de productos no encontrados")
             .located(By.cssSelector(".sin-resultados"));

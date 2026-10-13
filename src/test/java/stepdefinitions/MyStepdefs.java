@@ -20,6 +20,7 @@ import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
 import io.cucumber.java.es.Y;
+import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
 import net.serenitybdd.screenplay.actions.Open;
 import net.serenitybdd.screenplay.actors.OnStage;
 import net.serenitybdd.screenplay.actors.OnlineCast;
@@ -42,13 +43,24 @@ public class MyStepdefs {
         theActorCalled("Alquimista");
     }
 
+    private void navegarConLimpieza(String url) {
+        theActorInTheSpotlight().attemptsTo(Open.url(url));
+        try {
+            BrowseTheWeb.as(theActorInTheSpotlight()).evaluateJavascript(
+                    "try { localStorage.clear(); sessionStorage.clear(); } catch(e){}"
+            );
+        } catch (Exception ignored) {
+        }
+        theActorInTheSpotlight().attemptsTo(Open.url(url));
+    }
+
     // ==========================================
     // Pasos de Autenticación
     // ==========================================
 
     @Dado("que el usuario abre la página de inicio de sesión {string}")
     public void queElUsuarioAbreLaPaginaDeInicioDeSesion(String url) {
-        theActorInTheSpotlight().attemptsTo(Open.url(url));
+        navegarConLimpieza(url);
     }
 
     @Cuando("ingresa el usuario {string} y la contraseña {string}")
@@ -59,7 +71,7 @@ public class MyStepdefs {
     @Entonces("debería ingresar al sistema y ver el saludo {string}")
     public void deberiaIngresarAlSistemaYVerElSaludo(String saludoEsperado) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CatalogoUI.SALUDO_USUARIO, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CatalogoUI.SALUDO_USUARIO, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El saludo en la barra superior contiene el usuario esperado",
@@ -70,7 +82,7 @@ public class MyStepdefs {
     @Entonces("debería observar el mensaje de error {string}")
     public void deberiaObservarElMensajeDeError(String mensajeError) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(LoginUI.MENSAJE_ERROR, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(LoginUI.MENSAJE_ERROR, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El mensaje de error de credenciales coincide con el esperado",
@@ -84,10 +96,10 @@ public class MyStepdefs {
 
     @Dado("que el usuario inicia sesión exitosamente en {string} con {string} y {string}")
     public void queElUsuarioIniciaSesionExitosamente(String url, String usuario, String clave) {
+        navegarConLimpieza(url);
         theActorInTheSpotlight().attemptsTo(
-                Open.url(url),
                 IniciarSesion.conCredenciales(usuario, clave),
-                WaitUntil.the(CatalogoUI.TITULO_CATALOGO, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CatalogoUI.TITULO_CATALOGO, isVisible()).forNoMoreThan(15).seconds()
         );
     }
 
@@ -112,18 +124,18 @@ public class MyStepdefs {
     @Entonces("debería visualizar el producto {string} en los resultados")
     public void deberiaVisualizarElProductoEnLosResultados(String nombreEsperado) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CatalogoUI.NOMBRES_PRODUCTOS, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CatalogoUI.PRODUCTO_POR_NOMBRE.of(nombreEsperado), isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
-                seeThat("El resultado de búsqueda contiene el producto esperado",
-                        ElTexto.de(CatalogoUI.NOMBRES_PRODUCTOS), containsString(nombreEsperado))
+                seeThat("El producto esperado es visible en los resultados",
+                        ElEstado.esVisible(CatalogoUI.PRODUCTO_POR_NOMBRE.of(nombreEsperado)), is(true))
         );
     }
 
     @Entonces("debería observar el aviso de búsqueda {string}")
     public void deberiaObservarElAvisoDeBusqueda(String avisoEsperado) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CatalogoUI.MENSAJE_SIN_RESULTADOS, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CatalogoUI.MENSAJE_SIN_RESULTADOS, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El aviso de catálogo sin resultados es visible",
@@ -161,7 +173,7 @@ public class MyStepdefs {
     @Y("debería ver la notificación {string}")
     public void deberiaVerLaNotificacion(String notificacionEsperada) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CatalogoUI.MENSAJE_NOTIFICACION, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CatalogoUI.MENSAJE_NOTIFICACION, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El mensaje de notificación del catálogo coincide",
@@ -172,7 +184,7 @@ public class MyStepdefs {
     @Entonces("debería observar la alerta {string}")
     public void deberiaObservarLaAlerta(String alertaEsperada) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CatalogoUI.MENSAJE_NOTIFICACION, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CatalogoUI.MENSAJE_NOTIFICACION, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("La alerta de cantidad máxima del catálogo coincide",
@@ -184,7 +196,7 @@ public class MyStepdefs {
     public void seEncuentraEnLaPantallaDelCarritoDeCompras() {
         theActorInTheSpotlight().attemptsTo(
                 IrAlCarrito.ahora(),
-                WaitUntil.the(CarritoUI.TITULO_CARRITO, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CarritoUI.TITULO_CARRITO, isVisible()).forNoMoreThan(15).seconds()
         );
     }
 
@@ -196,7 +208,7 @@ public class MyStepdefs {
     @Entonces("debería observar el mensaje de cupón {string}")
     public void deberiaObservarElMensajeDeCupon(String mensajeEsperado) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CarritoUI.MENSAJE_CUPON, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CarritoUI.MENSAJE_CUPON, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El mensaje de resultado del cupón coincide",
@@ -207,7 +219,7 @@ public class MyStepdefs {
     @Y("el resumen debería reflejar el descuento aplicado")
     public void elResumenDeberiaReflejarElDescuentoAplicado() {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CarritoUI.FILA_DESCUENTO, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CarritoUI.FILA_DESCUENTO, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("La fila de descuento se encuentra visible en el resumen",
@@ -223,7 +235,7 @@ public class MyStepdefs {
     public void queAvanzaHaciaLaPantallaDePagoYEnvio() {
         theActorInTheSpotlight().attemptsTo(
                 IrACheckout.ahora(),
-                WaitUntil.the(CheckoutUI.BOTON_CONFIRMAR, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CheckoutUI.BOTON_CONFIRMAR, isVisible()).forNoMoreThan(15).seconds()
         );
     }
 
@@ -235,7 +247,7 @@ public class MyStepdefs {
     @Entonces("debería observar la alerta de checkout {string}")
     public void deberiaObservarLaAlertaDeCheckout(String mensajeEsperado) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CheckoutUI.MENSAJE_CHECKOUT, isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CheckoutUI.MENSAJE_CHECKOUT, isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El mensaje general de validación de checkout coincide",
@@ -246,7 +258,7 @@ public class MyStepdefs {
     @Y("el campo de nombre debería señalar el error {string}")
     public void elCampoDeNombreDeberiaSenalarElError(String errorEsperado) {
         theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(CheckoutUI.ERROR_CAMPO.of("nombre"), isVisible()).forNoMoreThan(10).seconds()
+                WaitUntil.the(CheckoutUI.ERROR_CAMPO.of("nombre"), isVisible()).forNoMoreThan(15).seconds()
         );
         theActorInTheSpotlight().should(
                 seeThat("El error de validación bajo el campo de nombre coincide",
