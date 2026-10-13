@@ -1,0 +1,36 @@
+name: Serenity BDD Front-End Test Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Dar permisos de ejecución a Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Ejecutar pruebas automatizadas con Serenity BDD
+        run: ./gradlew test aggregate --no-daemon
+
+      - name: Publicar reporte de Documentación Viva de Serenity
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serenity-living-documentation-report
+          path: target/site/serenity/
+          retention-days: 14
