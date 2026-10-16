@@ -9,7 +9,45 @@ on:
 
 jobs:
   test:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - issue: "Issue-1"
+            tag: "@Issue-1"
+            name: "Prueba 1: Login exitoso (@Issue-1)"
+          - issue: "Issue-2"
+            tag: "@Issue-2"
+            name: "Prueba 2: Login contraseña incorrecta (@Issue-2)"
+          - issue: "Issue-3"
+            tag: "@Issue-3"
+            name: "Prueba 3: Login usuario no registrado (@Issue-3)"
+          - issue: "Issue-4"
+            tag: "@Issue-4"
+            name: "Prueba 4: Filtro por categoría (@Issue-4)"
+          - issue: "Issue-5"
+            tag: "@Issue-5"
+            name: "Prueba 5: Búsqueda producto existente (@Issue-5)"
+          - issue: "Issue-6"
+            tag: "@Issue-6"
+            name: "Prueba 6: Búsqueda producto inexistente (@Issue-6)"
+          - issue: "Issue-7"
+            tag: "@Issue-7"
+            name: "Prueba 7: Agregar producto al carrito (@Issue-7)"
+          - issue: "Issue-8"
+            tag: "@Issue-8"
+            name: "Prueba 8: Validación cantidad máxima carrito (@Issue-8)"
+          - issue: "Issue-9"
+            tag: "@Issue-9"
+            name: "Prueba 9: Cupón de descuento válido (@Issue-9)"
+          - issue: "Issue-10"
+            tag: "@Issue-10"
+            name: "Prueba 10: Cupón de descuento inexistente (@Issue-10)"
+          - issue: "Issue-11"
+            tag: "@Issue-11"
+            name: "Prueba 11: Checkout campos obligatorios (@Issue-11)"
 
     steps:
       - name: Descargar repositorio
@@ -20,22 +58,23 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
 
       - name: Dar permisos de ejecución a Gradle wrapper
         run: chmod +x ./gradlew
 
-      - name: Esperar disponibilidad de la aplicacion (Render Cold Start)
+      - name: Esperar disponibilidad de la aplicación (Render Cold Start)
         run: |
-          echo "Despertando el servidor de La Botica del Alquimista..."
+          echo "Verificando disponibilidad de La Botica del Alquimista..."
           curl -s -I --retry 10 --retry-delay 5 --retry-connrefused https://boticaalquimista.onrender.com/index.html || true
 
-      - name: Ejecutar pruebas automatizadas con Serenity BDD
-        run: ./gradlew test aggregate --no-daemon -Dheadless.mode=true
+      - name: Ejecutar prueba individual (${{ matrix.name }})
+        run: ./gradlew test aggregate --no-daemon -Dheadless.mode=true "-Dcucumber.filter.tags=${{ matrix.tag }}"
 
-      - name: Publicar reporte de Documentación Viva de Serenity
+      - name: Publicar reporte Serenity para ${{ matrix.issue }}
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: serenity-living-documentation-report
+          name: serenity-report-${{ matrix.issue }}
           path: target/site/serenity/
           retention-days: 14

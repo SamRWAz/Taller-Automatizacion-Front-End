@@ -273,6 +273,10 @@ Start-Process target/site/serenity/index.html
 ### P5: ¿Por qué el pipeline de GitHub Actions necesita el paso de 'curl'?
 > **Respuesta:** *"Porque la aplicación está desplegada en el tier gratuito de Render, el cual hiberna tras 15 minutos de inactividad (Cold Start). Si las pruebas arrancan sin que el servidor esté activo, la primera petición puede tardar 45 segundos y causar timeouts. Con `curl --retry`, despertamos la máquina antes de iniciar Gradle y garantizamos que el servidor responda HTTP 200."*
 
+### P6: ¿Cómo se evalúa cada prueba de forma independiente en GitHub Actions?
+> **Respuesta:** *"Implementamos una estrategia de Build Matrix (`strategy.matrix`) con `fail-fast: false` en `.github/workflows/ci.yml`. Cada escenario (`@Issue-1` al `@Issue-11`) se ejecuta como un Job individual e independiente en GitHub Actions. Esto permite que la profesora vea el estado de cada prueba por separado (su propio check verde/rojo en la interfaz de GitHub), con logs aislados y la publicación de su reporte Serenity correspondiente sin que el fallo de una afecte a las demás."*
+
+
 ---
 
 ## 9. Cómo Generar Localizadores en Vivo

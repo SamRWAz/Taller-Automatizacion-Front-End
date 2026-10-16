@@ -127,6 +127,7 @@ Start-Process target/site/serenity/index.html
 ## Integración Continua (GitHub Actions)
 
 El archivo `.github/workflows/ci.yml` ejecuta automáticamente las pruebas en cada `push` o `pull_request` a las ramas principales (`main`/`master`):
-1. Configuración de entorno con **Java 17**.
-2. Ejecución headless con `./gradlew test aggregate`.
-3. Publicación del reporte de Serenity como artefacto de compilación descargable (`serenity-living-documentation-report`).
+1. **Evaluación Individual por Prueba (Build Matrix):** Utiliza una matriz de trabajos en GitHub Actions con `fail-fast: false`, ejecutando cada escenario (`@Issue-1` a `@Issue-11`) en su propio contenedor aislado. Esto permite evaluar el estado independiente de cada prueba directamente en la interfaz de GitHub.
+2. **Entorno de Ejecución:** Configurado con Java 17, caché de Gradle y Google Chrome Headless en Ubuntu.
+3. **Manejo de Cold Start:** Realiza sondeo previo al backend en Render antes de lanzar las pruebas.
+4. **Artefactos Serenity por Prueba:** Publica el reporte de Documentación Viva interactivo generado para cada Issue individualmente (`serenity-report-Issue-X`).
